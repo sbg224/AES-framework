@@ -6,7 +6,7 @@ Le développeur décide. Les agents assistent. Le framework garantit la cohéren
 
 ## Qu'est-ce qu'AES ?
 
-AES fournit une méthode de travail unique, reproductible et indépendante des outils utilisés : des règles de comportement pour les agents, un processus de travail en neuf étapes, des standards techniques, et une documentation vivante qui évolue avec chaque projet.
+AES fournit une méthode de travail unique, reproductible et indépendante des outils utilisés des règles de comportement pour les agents, un processus de travail en neuf étapes, des standards techniques, et une documentation vivante qui évolue avec chaque projet.
 
 Le framework est agnostique de tout agent IA (Claude Code, Codex, ou tout autre outil présent ou futur). Pour comprendre les principes qui le fondent, voir [docs/PHILOSOPHY.md](docs/PHILOSOPHY.md).
 
