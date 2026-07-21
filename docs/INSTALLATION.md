@@ -68,7 +68,7 @@ Une fois copiés, ces 14 fichiers appartiennent immédiatement et entièrement a
 
 Étape 3
 
-Remplir CONTEXT.md en premier, même sommairement (nom du projet, objectif, périmètre). C’est le point de départ fonctionnel réel du projet. Aucun autre document vivant n’a de socle sans lui.
+Remplir CONTEXT.md en premier, même sommairement (nom du projet, objectif, périmètre). C’est le point de départ fonctionnel réel du projet. Les autres documents vivants dépendent de lui pour avoir un sens.
 
 Ce document ne peut pas être extrait du code : les objectifs métier, le public cible et les règles métier n’existent que dans la connaissance du développeur, sur un projet neuf comme sur un projet déjà en cours. Seul le champ « État du projet » peut être pré-rempli par déduction (présence d’une configuration de déploiement, par exemple).
 
