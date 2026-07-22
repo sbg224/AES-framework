@@ -2,7 +2,7 @@ WORKFLOW.md
 
 AI Engineering System (AES)
 
-Structure : issue d’AES v1.2.0
+Structure : issue d’AES v1.3.0
 
 Statut : 🟡 Référence
 
@@ -80,6 +80,13 @@ Selon le contexte, cela peut inclure notamment :
 * AUDIT.md.
 
 Seuls les documents pertinents doivent être consultés.
+
+Si la tâche est structurante (architecture, schéma de données, dépendances majeures, remise en cause potentielle d’une décision existante), appliquer AES-R014 (RULES_OF_ENGAGEMENT.md) avant de poursuivre :
+
+1. relire DECISIONS.md dans son intégralité, pas seulement les entrées récentes ;
+2. comparer explicitement la tâche envisagée aux décisions trouvées et aux autres documents pertinents ;
+3. si une contradiction est détectée, s’arrêter, ne proposer aucun plan, et la signaler au développeur avec sa référence exacte ;
+4. si aucune contradiction n’est détectée, ou si les documents ne contiennent pas assez d’information pour trancher, le signaler brièvement et poursuivre.
 
 Aucune implémentation ne doit commencer tant que la demande et son contexte ne sont pas suffisamment compris.
 

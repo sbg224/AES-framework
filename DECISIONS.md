@@ -2,7 +2,7 @@ DECISIONS.md
 
 AI Engineering System (AES)
 
-Version : 1.2.0
+Version : 1.3.0
 
 Statut : 🟢 Vivant
 
@@ -235,6 +235,46 @@ Justification : le code révèle le QUOI, jamais le POURQUOI, qui n’existe que
 Alternatives étudiées : extraction automatique complète y compris CONTEXT.md, écartée, impossible à faire honnêtement à partir du seul code ; reconstitution systématique de DECISIONS.md, écartée, risque de justifications fabriquées.
 
 Conséquences : docs/INSTALLATION.md §3 restructuré en deux parcours ; templates/DECISIONS.md §4 précise la reconstitution ciblée.
+
+Statut : Validée
+
+⸻
+
+AES-D010 — Vérification de conformité centralisée et installation outillée
+
+Date : 2026-07-22
+
+Auteur : Développeur, avec l’agent
+
+Contexte : un incident réel (projet 3M Drive) a montré qu’une recommandation technique pouvait être proposée sans consultation effective de DECISIONS.md, malgré une mention en prose dans WORKFLOW.md. Une première architecture fondée sur un hook expérimental et un sous-agent dédié a été écartée, jugée fragile, coûteuse et non portable vers Codex.
+
+Décision : la vérification de conformité est centralisée dans une règle unique, AES-R014 (RULES_OF_ENGAGEMENT.md), détaillée dans WORKFLOW.md, Étape 1. Chaque intégration agent (`integrations/<agent>/`) se limite à déclencher cette procédure dans le format propre à l’outil, sans la redécrire. La liste des fichiers installables et du socle est déplacée dans une source de vérité unique, `install/installation.manifest.json`, dont la synchronisation avec INSTALLATION.md et avec le système de fichiers est vérifiée automatiquement plutôt que supposée. Un installateur (`install/installer.js`) sépare strictement l’analyse, toujours sûre, de l’application, protégée par des préconditions git et une politique de non-écrasement fondée sur le statut de chaque document.
+
+Justification : la première architecture reproduisait, par un mécanisme différent, le même défaut que l’incident initial, une garantie qui dépend du bon vouloir du raisonnement plutôt que d’un mécanisme vérifiable. La centralisation de la procédure évite la duplication qu’une intégration par agent aurait sinon produite (AES-R011). Le manifeste évite qu’un script et la documentation maintiennent chacun leur propre liste, avec le risque de divergence déjà rencontré une fois avec le champ « Version » des gabarits (AES-D006).
+
+Alternatives étudiées : hook `agent` expérimental déclenchant un sous-agent dédié, écartée (voir contexte) ; réécriture de la procédure dans chaque intégration agent, écartée pour duplication ; liste des fichiers installables codée en dur dans le script, écartée pour risque de divergence avec la documentation.
+
+Conséquences : RULES_OF_ENGAGEMENT.md gagne un quatorzième identifiant (AES-R014) ; WORKFLOW.md Étape 1 précise la procédure ; `integrations/claude-code/skills/aes-check/` devient un déclencheur fin ; `install/` regroupe le manifeste, l’installateur, sa validation et ses tests ; SYSTEM.md passe en version 1.3.0.
+
+Statut : Validée
+
+⸻
+
+AES-D011 — Node.js comme runtime de l’installateur
+
+Date : 2026-07-22
+
+Auteur : Développeur, avec l’agent
+
+Contexte : l’installateur (AES-D010) a d’abord été écrit en Python, un choix fait sans être soumis à validation, alors qu’aucune décision documentée ne le fixait. Une fois signalé, le développeur a précisé l’orientation réellement souhaitée : Node.js, pour la cohérence avec l’écosystème des projets cibles (JavaScript/Node), une exécution facilitée via npx à terme, l’absence de dépendance supplémentaire à un autre langage, et une distribution future simplifiée via npm.
+
+Décision : l’installateur AES (`install/installer.js`, `install/validate_manifest.js`, `install/tests/test_installer.js`) est écrit en Node.js, modules natifs uniquement (`fs`, `path`, `child_process`, `node:test`, `node:assert`), sans dépendance ajoutée au projet cible. Son architecture reste compatible avec une future exécution via `npx`.
+
+Justification : les projets cibles (3M Drive, GM_Communication, FrigoCheck) appartiennent à l’écosystème JavaScript/Node ; y ajouter une dépendance à Python pour l’outillage AES aurait introduit une friction sans bénéfice technique démontré. Le manifeste JSON, les fixtures et le protocole comportemental restent indépendants du langage, seule l’implémentation de l’installateur est concernée.
+
+Alternatives étudiées : conserver l’implémentation Python déjà écrite, écartée en l’absence de raison technique forte et par cohérence avec l’écosystème des projets cibles.
+
+Conséquences : `install/installer.py`, `install/validate_manifest.py` et `install/tests/test_installer.py` supprimés après vérification de parité stricte (mêmes 9 scénarios de test, même sortie sur `examples/nextjs-project`, mêmes fichiers produits sur une installation neuve) ; INSTALLATION.md, CHANGELOG.md et DECISIONS.md mis à jour pour référencer les fichiers `.js`.
 
 Statut : Validée
 

@@ -2,7 +2,7 @@ RULES_OF_ENGAGEMENT.md
 
 AI Engineering System (AES)
 
-Structure : issue d’AES v1.2.0
+Structure : issue d’AES v1.3.0
 
 Statut : 🔒 Gouvernance
 
@@ -252,6 +252,20 @@ Cette interdiction est absolue. Contrairement aux règles d’AES-R003, elle ne 
 Avant chaque proposition de commit, l’agent examine la liste des fichiers modifiés à la recherche de données sensibles. Cette vérification est effectuée même si les fichiers concernés figurent déjà dans `.gitignore`, car `.gitignore` peut lui-même être incomplet ou mal configuré.
 
 Si une donnée sensible est détectée, l’agent n’effectue aucun commit, alerte immédiatement le développeur, et attend ses instructions avant toute autre action.
+
+⸻
+
+AES-R014 — Vérification de conformité avant une tâche structurante
+
+Objectif
+
+Empêcher qu’une tâche touchant l’architecture, les données ou une décision déjà prise soit engagée sans vérifier sa cohérence avec l’existant.
+
+Règle
+
+Avant toute tâche structurante (architecture, schéma de données, dépendances majeures, remise en cause potentielle d’une décision existante), l’agent vérifie la conformité de la tâche envisagée avec DECISIONS.md et les documents pertinents, selon la procédure détaillée dans WORKFLOW.md, Étape 1.
+
+Toute contradiction détectée bloque la tâche. Elle est signalée au développeur avec sa référence exacte, avant qu’aucun plan ne soit proposé.
 
 ⸻
 

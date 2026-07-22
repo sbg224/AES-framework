@@ -2,7 +2,7 @@ CHANGELOG.md
 
 AI Engineering System (AES)
 
-Version : 1.2.0
+Version : 1.3.0
 
 Statut : 🟢 Vivant
 
@@ -104,6 +104,20 @@ Exemple :
 ⸻
 
 8. Historique
+
+## [1.3.0] - 2026-07-22
+
+### Added
+- AES-R014 : vérification de conformité obligatoire avant une tâche structurante, procédure détaillée dans WORKFLOW.md, Étape 1 (voir AES-D010).
+- `integrations/claude-code/skills/aes-check/` et `integrations/claude-code/hooks/` : compétence `/aes-check` (cinq statuts stables, ligne `REFERENCES:`) et rappel léger non bloquant, tous deux de simples déclencheurs d'AES-R014, sans duplication de la procédure.
+- `install/installation.manifest.json` : source de vérité unique des 14 fichiers installables et du socle, remplaçant toute liste implicite ou dupliquée.
+- `install/installer.js` (Node.js, modules natifs uniquement, voir AES-D011) : installateur en deux phases strictes (analyse, toujours sûre ; application, avec préconditions git, écritures atomiques, protection à trois niveaux selon le statut de chaque document).
+- `install/validate_manifest.js` et `install/tests/test_installer.js` (`node --test`) : vérification automatique que le manifeste, INSTALLATION.md et les statuts déclarés ne divergent jamais ; tests déterministes de l'installateur (idempotence, non-écrasement, conflits, préconditions git, erreurs).
+- `install/tests/aes_check_protocole.md` : protocole comportemental reconstituant l'incident fondateur (contradiction Postgres/Proxmox non détectée), explicitement qualifié de semi-automatisé, pas déterministe.
+
+### Changed
+- INSTALLATION.md §3 et §6 : renvoient au manifeste et à AES-R014 plutôt que de dupliquer leur contenu.
+- Installateur réécrit en Node.js après une première implémentation Python jamais soumise à validation (voir AES-D011). Parité vérifiée avant suppression du code Python.
 
 ## [1.2.0] - 2026-07-20
 

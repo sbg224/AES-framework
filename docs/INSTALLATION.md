@@ -66,6 +66,12 @@ SYSTEM.md reste à la racine du framework plutôt que dans `templates/` car il d
 
 Une fois copiés, ces 14 fichiers appartiennent immédiatement et entièrement au projet (voir SYSTEM.md §8, « Frontière entre le framework et un projet »).
 
+Cette liste est la représentation en prose d'une source de vérité unique, `install/installation.manifest.json`, à la racine du dépôt AES. Le manifeste est le seul endroit qui fait autorité pour un script d'installation ; cette liste en est un reflet, vérifié automatiquement par `install/validate_manifest.js`, jamais une seconde liste indépendante.
+
+La copie peut être faite à la main, ou via un installateur écrit en Node.js, modules natifs uniquement, sans dépendance ajoutée au projet cible (voir AES-D011). Par défaut, seule l'analyse est possible, `node install/installer.js analyze <projet>`, qui n'écrit jamais rien. L'écriture réelle nécessite une commande distincte et explicite, `node install/installer.js apply <projet>`, qui ne crée que ce qui manque et ne remplace jamais un document déjà présent.
+
+Deux options existent pour les cas où git est absent ou l'arbre non propre, `--allow-no-git` et `--allow-dirty`. Elles réduisent les garanties de sécurité de l'installateur et ne sont jamais activées par défaut. Documentation complète du CLI, de ses statuts et de ses limites connues : voir [`install/README.md`](../install/README.md).
+
 Étape 3
 
 Remplir CONTEXT.md en premier, même sommairement (nom du projet, objectif, périmètre). C’est le point de départ fonctionnel réel du projet. Les autres documents vivants dépendent de lui pour avoir un sens.
@@ -129,6 +135,18 @@ Les quatre documents socle (SYSTEM.md, RULES_OF_ENGAGEMENT.md, WORKFLOW.md, AGEN
 * autres agents : utiliser le mécanisme de contexte permanent propre à l’outil (fichier de configuration, instructions système, mémoire de projet).
 
 Les autres documents de `ia/` restent consultés sélectivement.
+
+Vérification de conformité
+
+Au-delà du chargement du socle, AES fournit un mécanisme actif de vérification, défini par AES-R014 (RULES_OF_ENGAGEMENT.md) et détaillé dans WORKFLOW.md, Étape 1 : avant une tâche structurante (architecture, données, dépendances, décision technique), la tâche envisagée est comparée à DECISIONS.md et aux documents pertinents, plutôt que de dépendre d’une lecture spontanée.
+
+Le principe retenu n’est pas un mécanisme technique unique à répliquer à l’identique sur chaque outil, mais un contenu de vérification identique, installé à l’endroit propre à chaque agent :
+
+* Claude Code : une compétence `/aes-check` (voir `integrations/claude-code/skills/aes-check/`), accompagnée d’un rappel léger et non bloquant déclenché à chaque message (voir `integrations/claude-code/hooks/`) ;
+* Codex : commande personnalisée équivalente, associée au Guardian natif de l’outil ;
+* autres agents : le même contenu de vérification, porté par le mécanisme de commande ou de rappel propre à l’outil.
+
+Cette vérification complète le socle, elle ne le remplace pas.
 
 Ce principe garantit qu’AES reste utilisable, sans adaptation de fond, avec tout agent présent ou futur.
 

@@ -1,0 +1,26 @@
+{
+  "schema_version": "1.0.0",
+  "destination_racine": "ia/",
+  "socle": [
+    "SYSTEM.md",
+    "RULES_OF_ENGAGEMENT.md",
+    "WORKFLOW.md",
+    "AGENT.md"
+  ],
+  "fichiers": [
+    {"nom": "SYSTEM.md", "source": "SYSTEM.md", "statut": "gouvernance"},
+    {"nom": "RULES_OF_ENGAGEMENT.md", "source": "templates/RULES_OF_ENGAGEMENT.md", "statut": "gouvernance"},
+    {"nom": "AGENT.md", "source": "templates/AGENT.md", "statut": "reference"},
+    {"nom": "WORKFLOW.md", "source": "templates/WORKFLOW.md", "statut": "reference"},
+    {"nom": "STANDARDS.md", "source": "templates/STANDARDS.md", "statut": "reference"},
+    {"nom": "STACK.md", "source": "templates/STACK.md", "statut": "reference"},
+    {"nom": "ARCHITECTURE.md", "source": "templates/ARCHITECTURE.md", "statut": "reference"},
+    {"nom": "PROMPTS.md", "source": "templates/PROMPTS.md", "statut": "reference"},
+    {"nom": "CHECKLIST.md", "source": "templates/CHECKLIST.md", "statut": "reference"},
+    {"nom": "CONTEXT.md", "source": "templates/CONTEXT.md", "statut": "vivant"},
+    {"nom": "AUDIT.md", "source": "templates/AUDIT.md", "statut": "vivant"},
+    {"nom": "DECISIONS.md", "source": "templates/DECISIONS.md", "statut": "vivant"},
+    {"nom": "LEARNING.md", "source": "templates/LEARNING.md", "statut": "vivant"},
+    {"nom": "CHANGELOG.md", "source": "templates/CHANGELOG.md", "statut": "vivant"}
+  ]
+}

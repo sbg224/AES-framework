@@ -1,0 +1,16 @@
+{
+  "hooks": {
+    "UserPromptSubmit": [
+      {
+        "matcher": "*",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "$CLAUDE_PROJECT_DIR/integrations/claude-code/hooks/aes-reminder.sh",
+            "timeout": 5
+          }
+        ]
+      }
+    ]
+  }
+}
