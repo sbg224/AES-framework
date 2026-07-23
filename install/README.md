@@ -23,8 +23,8 @@ L’installation est conçue pour :
 
 Avant de commencer, assurez-vous de disposer de :
 
-* Git installé sur votre machine ([git-scm.com](https://git-scm.com)), nécessaire pour obtenir une copie du dépôt AES Framework (voir §3) ;
-* Node.js installé sur votre machine ;
+* Git installé sur votre machine ([git-scm.com](https://git-scm.com)), nécessaire pour obtenir une copie du dépôt AES Framework (voir §3) — vérifiable avec `git --version` ;
+* Node.js installé sur votre machine — vérifiable avec `node --version` ;
 * une copie locale du dépôt AES Framework, obtenue par clonage (voir §3) ;
 * un projet cible dans lequel vous souhaitez installer AES.
 
@@ -80,6 +80,8 @@ node ../AES-Framework/install/installer.js analyze .
 
 Toutes les commandes de ce document utilisent la première forme par convention de lecture ; remplacer le chemin d’accès à `install/installer.js` et le chemin du projet cible par les vôtres selon la position choisie et l’emplacement réel des deux dossiers. Les mêmes deux façons s’appliquent identiquement à `apply` (§4) et à `integration analyze`/`integration apply` (§5).
 
+Rappel de lecture des chemins : `.` est toujours le dossier courant, `..` est toujours son dossier parent. Ainsi `../AES-Framework/install/installer.js` signifie « remonter d’un niveau, puis entrer dans `AES-Framework/` ». En cas de doute sur un chemin, `ls ../AES-Framework/install/installer.js` (ou le chemin utilisé) confirme qu’il est correct avant de lancer l’installateur — une erreur `No such file or directory` signale un mauvais chemin, pas un problème de l’installateur.
+
 ⸻
 
 4. Installation en trois étapes
@@ -110,7 +112,11 @@ Vous pouvez lancer cette commande autant de fois que nécessaire.
 
 Étape 2 — Vérifier le résultat
 
-Analysez les statuts affichés.
+Analysez les statuts affichés, par exemple :
+
+CREATE    SYSTEM.md
+SKIP      CONTEXT.md
+REVIEW    STACK.md
 
 S’il existe des conflits (CONFLICT) ou des erreurs (ERROR), ils doivent être résolus avant de poursuivre.
 
@@ -137,6 +143,11 @@ Avant toute écriture, apply effectue automatiquement une nouvelle analyse afin 
 5. Intégrations d'agents (Claude Code)
 
 Le socle `ia/` (sections 1 à 4 ci-dessus) est indépendant de tout agent. Le rattachement à un agent précis (chargement du socle, `/aes-check`, rappel non bloquant) relève d'une commande séparée, `integration`, décrite dans docs/INSTALLATION.md §6 et fondée sur AES-D012 (DECISIONS.md).
+
+L'intégration refuse par défaut un projet Git non propre (voir §6, `--allow-dirty`). Si le socle vient d'être installé, enregistrez-le avant de lancer l'intégration :
+
+git add ia
+git commit -m "Ajout du socle AES Framework"
 
 Pour Claude Code, depuis la racine du dépôt AES Framework :
 
@@ -313,3 +324,16 @@ Les limitations actuelles sont les suivantes :
 * l’installation n’est pas transactionnelle à l’échelle de l’ensemble du projet ;
 * les options --allow-no-git et --allow-dirty diminuent les garanties de sécurité ;
 * les tests de /aes-check sont comportementaux et non déterministes, car ils reposent sur un agent génératif, contrairement aux tests de l’installateur qui sont entièrement déterministes.
+
+⸻
+
+Aide-mémoire (copier-coller)
+
+Parcours complet pour un projet cible voisin d'AES Framework (structure recommandée, §3), socle puis intégration Claude Code :
+
+cd mon-projet
+node ../AES-Framework/install/installer.js analyze .
+node ../AES-Framework/install/installer.js apply .
+git add ia && git commit -m "Ajout du socle AES Framework"
+node ../AES-Framework/install/installer.js integration analyze claude-code .
+node ../AES-Framework/install/installer.js integration apply claude-code .
