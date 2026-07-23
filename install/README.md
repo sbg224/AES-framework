@@ -96,7 +96,29 @@ Avant toute écriture, apply effectue automatiquement une nouvelle analyse afin 
 
 ⸻
 
-5. Options disponibles
+5. Intégrations d'agents (Claude Code)
+
+Le socle `ia/` (sections 1 à 4 ci-dessus) est indépendant de tout agent. Le rattachement à un agent précis (chargement du socle, `/aes-check`, rappel non bloquant) relève d'une commande séparée, `integration`, décrite dans docs/INSTALLATION.md §6 et fondée sur AES-D012 (DECISIONS.md).
+
+Pour Claude Code :
+
+node install/installer.js integration analyze claude-code <chemin_projet>
+node install/installer.js integration apply   claude-code <chemin_projet> [--allow-no-git] [--allow-dirty]
+
+Cette commande installe quatre artefacts, décrits dans `install/integrations/claude_code.manifest.json` :
+
+* le skill `/aes-check` (`.claude/skills/aes-check/SKILL.md`), copié depuis le gabarit ;
+* le script exécuté par le hook (`.claude/hooks/aes-reminder.sh`), copié avec restauration du bit exécutable ;
+* l'entrée du hook dans `.claude/settings.json`, fusionnée de façon strictement additive, jamais un remplacement du fichier ;
+* un bloc minimal dans CLAUDE.md référençant le socle par import natif (`@ia/SYSTEM.md`, etc.), délimité par les marqueurs `<!-- AES:SOCLE:BEGIN -->` / `<!-- AES:SOCLE:END -->`, jamais de contenu hors de ce bloc modifié.
+
+Les mêmes garanties que pour le socle s'appliquent : `analyze` n'écrit jamais rien, `apply` réanalyse systématiquement avant d'écrire, les mêmes préconditions Git et options (`--allow-no-git`, `--allow-dirty`) s'appliquent, et l'exécution répétée est idempotente.
+
+Aucune commande équivalente n'existe encore pour Codex ou un autre agent (voir §13 « Limites connues »).
+
+⸻
+
+6. Options disponibles
 
 –allow-no-git
 
@@ -112,19 +134,19 @@ Autorise l’installation dans un dépôt Git contenant déjà des modifications
 
 ⚠️ Cette option réduit également les garanties puisque les modifications de l’installateur seront mélangées avec vos modifications locales.
 
-Ces deux options ne sont jamais activées automatiquement.
+Ces deux options ne sont jamais activées automatiquement, pour le socle comme pour une intégration d'agent.
 
 ⸻
 
-6. Comprendre les statuts
+7. Comprendre les statuts
 
-Statuts par fichier
+Statuts par fichier ou artefact
 
 Statut	Signification
-CREATE	Le fichier sera créé.
-SKIP	Le fichier existe déjà et ne nécessite aucune action.
+CREATE	L'élément sera créé ou son contenu fusionné (première écriture).
+SKIP	L'élément existe déjà et ne nécessite aucune action.
 REVIEW	Une vérification humaine est nécessaire.
-CONFLICT	Un conflit bloque l’installation.
+CONFLICT	Un conflit bloque l’installation (socle uniquement, voir §9).
 ERROR	Une erreur est survenue.
 
 ⸻
@@ -139,9 +161,11 @@ ERROR	Une erreur empêche la poursuite de l’installation.
 
 Un état BLOCKED_BY_CONFLICT ou ERROR empêche toute écriture.
 
+Pour l'intégration Claude Code, BLOCKED_BY_CONFLICT n'est produit par aucun scénario connu : aucun des quatre artefacts n'est en statut gouvernance (voir AES-D012).
+
 Remarque
 
-Ces statuts concernent uniquement l’installateur.
+Ces statuts concernent uniquement l’installateur (socle et intégrations).
 
 Les statuts de /aes-check (OK, CONTRADICTION, REVIEW_REQUIRED, INSUFFICIENT_CONTEXT, ERROR) sont documentés dans :
 
@@ -149,7 +173,7 @@ integrations/claude-code/skills/aes-check/SKILL.md
 
 ⸻
 
-7. Codes de sortie
+8. Codes de sortie
 
 Code	Signification
 0	Exécution réussie (y compris COMPLETED_WITH_REVIEW).
@@ -157,7 +181,7 @@ Code	Signification
 
 ⸻
 
-8. Protection des fichiers existants
+9. Protection des fichiers existants
 
 L’installateur respecte le niveau de protection défini pour chaque document.
 
@@ -168,9 +192,11 @@ Niveau	Comportement
 
 Une installation partielle crée uniquement les fichiers manquants et ne modifie jamais un fichier déjà présent.
 
+Pour l'intégration Claude Code, `.claude/settings.json` et CLAUDE.md ne sont jamais des fichiers que AES possède entièrement : toute configuration ou tout contenu déjà présent, hors de l'entrée ou du bloc propres à AES, est préservé à l'identique.
+
 ⸻
 
-9. Source de vérité
+10. Source de vérité
 
 Le fichier :
 
@@ -183,13 +209,15 @@ est la seule source de vérité décrivant :
 * leur destination ;
 * le socle AES.
 
+Pour l'intégration Claude Code, `install/integrations/claude_code.manifest.json` joue le même rôle sur son propre périmètre, avec un champ `type` explicite par artefact (`copie`, `fusion_json`, `fusion_markdown`).
+
 INSTALLATION.md constitue uniquement une documentation destinée aux utilisateurs et ne doit jamais devenir une seconde source de vérité.
 
 ⸻
 
-10. Validation et tests
+11. Validation et tests
 
-Vérifier le manifeste
+Vérifier le manifeste du socle
 
 node install/validate_manifest.js
 
@@ -205,12 +233,13 @@ Cette commande vérifie la cohérence entre :
 Exécuter les tests
 
 node --test install/tests/test_installer.js
+node --test install/tests/test_claude_code_integration.js
 
-Les tests déterministes permettent de vérifier le bon fonctionnement de l’installateur.
+Les tests déterministes permettent de vérifier le bon fonctionnement de l’installateur, du socle comme de l'intégration Claude Code.
 
 ⸻
 
-11. Installation interrompue
+12. Installation interrompue
 
 Chaque fichier est écrit de manière atomique.
 
@@ -226,15 +255,16 @@ Dans ce cas :
     * les fichiers encore manquants (CREATE) ;
 3. relancez apply pour terminer l’installation.
 
-Aucun doublon n’est créé et aucun fichier existant n’est écrasé.
+Aucun doublon n’est créé et aucun fichier existant n’est écrasé. Le même principe s'applique à `integration analyze`/`integration apply`.
 
 ⸻
 
-12. Limites connues
+13. Limites connues
 
 Les limitations actuelles sont les suivantes :
 
-* l’intégration Codex n’a pas encore été validée officiellement ;
+* l’intégration Codex n’a pas encore été validée officiellement, et aucune commande `integration` équivalente n'existe pour cet agent ;
+* aucune généralisation multi-agents (registre, système de plugins) n'est construite tant qu'un deuxième agent réel n'est pas validé (voir AES-D012) ;
 * l’architecture est compatible avec une future exécution via npx, mais aucun package n’est encore publié ;
 * le champ schema_version est réservé aux futures évolutions du manifeste ;
 * l’installation n’est pas transactionnelle à l’échelle de l’ensemble du projet ;

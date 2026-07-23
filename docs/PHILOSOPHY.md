@@ -20,6 +20,8 @@ La qualité d’un projet dépend autant de son organisation que de son code.
 
 Le framework fournit une structure commune permettant aux développeurs et aux agents IA de collaborer avec les mêmes règles, les mêmes références et la même compréhension du projet.
 
+Cette structure ne suppose aucune expérience préalable de programmation. Elle s'adresse aussi bien à un développeur confirmé qu’à quelqu’un qui débute, ou qui découvre la programmation assistée par l’IA.
+
 ⸻
 
 2. Une documentation qui travaille

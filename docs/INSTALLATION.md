@@ -10,15 +10,19 @@ Guide d’installation
 
 Ce document explique comment intégrer l’AI Engineering System (AES) dans un nouveau projet ou dans un projet existant.
 
+Ce guide décrit la mécanique complète, utile à qui veut la comprendre en détail. Si vous découvrez la programmation assistée par l’IA, vous n’avez pas besoin de tout lire vous-même : la façon la plus simple de procéder est de demander directement à votre agent IA (Claude Code, ChatGPT, Codex ou un autre) d’installer AES dans votre projet, en lui indiquant ce document. Il effectuera les étapes techniques à votre place ; votre seule tâche réelle reste de décrire votre projet (Étape 3 ci-dessous).
+
 ⸻
 
 2. Prérequis
 
 Avant de commencer, vérifier que :
 
-* le dépôt du projet est initialisé ;
-* un système de gestion de versions est utilisé ;
-* les outils de développement nécessaires sont installés.
+* le projet dispose si possible d’un dépôt Git, l’outil qui garde l’historique des modifications ([git-scm.com](https://git-scm.com) si besoin de l’installer) ; fortement recommandé, mais pas strictement obligatoire, voir `--allow-no-git` dans [`install/README.md`](../install/README.md) ;
+* Node.js est installé sur la machine ([nodejs.org](https://nodejs.org)), nécessaire à l’installateur AES ;
+* les autres outils de développement propres au projet sont installés.
+
+Si l’un de ces éléments manque ou si vous ne savez pas comment vérifier leur présence, demandez à votre agent IA de le faire pour vous, il sait interroger la machine et guider l’installation si nécessaire.
 
 Les prérequis spécifiques au projet doivent être documentés ici.
 
@@ -28,9 +32,11 @@ Les prérequis spécifiques au projet doivent être documentés ici.
 
 AES possède une politique officielle d’installation unique. Une seule procédure est recommandée ; aucune alternative officielle n’est maintenue.
 
+Les Étapes 1 et 2 ci-dessous (créer le dossier, copier les fichiers) sont mécaniques et peuvent être entièrement déléguées à votre agent IA ou à l’installateur (voir plus bas). Ce qui suit sert de référence détaillée, pas d’instructions à exécuter soi-même à la main.
+
 Étape 1
 
-Créer le dossier `ia/` à la racine du projet. C’est le nom officiel retenu par AES (voir DECISIONS.md racine, AES-D007, pour la justification de ce choix). Un projet peut le renommer si une convention interne l’exige, mais `ia/` est le nom par défaut recommandé dans toute documentation, exemple ou échange autour d’AES.
+Créer le dossier `ia/` à la racine du projet. C’est le nom officiel retenu par AES ; la justification complète du choix se trouve dans DECISIONS.md racine, AES-D007, mais elle n’est pas nécessaire pour installer AES. Un projet peut renommer ce dossier si une convention interne l’exige, mais `ia/` reste le nom par défaut recommandé dans toute documentation, exemple ou échange autour d’AES.
 
 Étape 2
 
@@ -131,7 +137,7 @@ Rattachement du socle
 
 Les quatre documents socle (SYSTEM.md, RULES_OF_ENGAGEMENT.md, WORKFLOW.md, AGENT.md, voir SYSTEM.md §4) doivent être chargés automatiquement, pas à la demande :
 
-* Claude Code, à titre d’exemple : référencer les quatre fichiers dans CLAUDE.md ;
+* Claude Code : automatisé (voir « Intégration outillée » ci-dessous) ; à défaut, référencer manuellement les quatre fichiers dans CLAUDE.md via la syntaxe d'import native de l'outil (`@ia/SYSTEM.md`, etc.) ;
 * autres agents : utiliser le mécanisme de contexte permanent propre à l’outil (fichier de configuration, instructions système, mémoire de projet).
 
 Les autres documents de `ia/` restent consultés sélectivement.
@@ -147,6 +153,19 @@ Le principe retenu n’est pas un mécanisme technique unique à répliquer à l
 * autres agents : le même contenu de vérification, porté par le mécanisme de commande ou de rappel propre à l’outil.
 
 Cette vérification complète le socle, elle ne le remplace pas.
+
+Intégration outillée (Claude Code)
+
+Pour Claude Code, le rattachement du socle et la vérification de conformité ci-dessus sont tous deux automatisés par une commande dédiée, distincte de l'installation du socle `ia/` (voir AES-D012, DECISIONS.md) :
+
+```
+node install/installer.js integration analyze claude-code <chemin_projet>
+node install/installer.js integration apply   claude-code <chemin_projet> [--allow-no-git] [--allow-dirty]
+```
+
+Cette commande installe quatre artefacts en une seule opération : le skill `/aes-check` (`.claude/skills/aes-check/`), le script exécuté par le hook (`.claude/hooks/aes-reminder.sh`, bit exécutable inclus), l'entrée du hook fusionnée dans `.claude/settings.json`, et un bloc minimal dans CLAUDE.md référençant le socle par import natif, jamais par duplication de contenu. Toute configuration déjà présente (permissions, autres hooks, contenu existant de CLAUDE.md) est préservée à l'identique, la fusion est strictement additive. Documentation complète, statuts et limites : voir [`install/README.md`](../install/README.md).
+
+Aucune commande équivalente n'existe encore pour Codex ou un autre agent ; le rattachement manuel décrit ci-dessus reste la voie applicable jusqu'à ce qu'une intégration outillée soit validée pour cet agent (voir AES-D012, « aucune généralisation multi-agents tant qu'un deuxième agent réel n'est pas validé »).
 
 Ce principe garantit qu’AES reste utilisable, sans adaptation de fond, avec tout agent présent ou futur.
 

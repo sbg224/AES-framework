@@ -1,0 +1,47 @@
+{
+  "schema_version": "1.0.0",
+  "agent": "claude-code",
+  "artefacts": [
+    {
+      "nom": "SKILL.md",
+      "type": "copie",
+      "source": "integrations/claude-code/skills/aes-check/SKILL.md",
+      "destination": ".claude/skills/aes-check/SKILL.md",
+      "statut": "reference"
+    },
+    {
+      "nom": "aes-reminder.sh",
+      "type": "copie",
+      "source": "integrations/claude-code/hooks/aes-reminder.sh",
+      "destination": ".claude/hooks/aes-reminder.sh",
+      "statut": "reference",
+      "executable": true
+    },
+    {
+      "nom": "hook UserPromptSubmit",
+      "type": "fusion_json",
+      "destination": ".claude/settings.json",
+      "cle": ["hooks", "UserPromptSubmit"],
+      "identifiant": "command",
+      "valeur_identifiante": "$CLAUDE_PROJECT_DIR/.claude/hooks/aes-reminder.sh",
+      "entree": {
+        "matcher": "*",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "$CLAUDE_PROJECT_DIR/.claude/hooks/aes-reminder.sh",
+            "timeout": 5
+          }
+        ]
+      }
+    },
+    {
+      "nom": "bloc socle",
+      "type": "fusion_markdown",
+      "destination": "CLAUDE.md",
+      "marqueur_debut": "<!-- AES:SOCLE:BEGIN -->",
+      "marqueur_fin": "<!-- AES:SOCLE:END -->",
+      "contenu": "<!-- AES:SOCLE:BEGIN -->\n## AES — AI Engineering System\n@ia/SYSTEM.md\n@ia/RULES_OF_ENGAGEMENT.md\n@ia/WORKFLOW.md\n@ia/AGENT.md\n<!-- AES:SOCLE:END -->\n"
+    }
+  ]
+}

@@ -2,7 +2,7 @@ SYSTEM.md
 
 AI Engineering System (AES)
 
-Version : 1.3.0
+Version : 1.4.0
 
 Statut : 🔒 Gouvernance
 
@@ -39,6 +39,8 @@ Elle assiste le développeur dans l’analyse, la conception, l’implémentatio
 Le développeur reste responsable des décisions et conserve en permanence le contrôle du projet.
 
 Le framework doit pouvoir être utilisé avec n’importe quel agent IA présent ou futur.
+
+Dans ce document, comme dans l’ensemble du framework, « développeur » désigne toute personne qui pilote un projet avec l’aide d’un agent IA : développeur expérimenté, débutant, ou personne utilisant le vibe coding (construire un projet en dialoguant avec une IA sans nécessairement écrire ou lire soi-même le code produit). Aucune expérience préalable de programmation n’est requise pour commencer à utiliser AES.
 
 ⸻
 
@@ -113,6 +115,21 @@ Principes
 * Un identifiant n’est jamais renommé.
 * Un identifiant n’est jamais réutilisé.
 * Le contenu associé peut évoluer sans modifier son identifiant.
+
+Glossaire
+
+Quelques termes récurrents dans ce framework, en langage courant, pour quiconque le découvre :
+
+* Gouvernance : la façon dont les règles et les décisions d’un projet sont organisées et validées.
+* Socle : les quatre documents chargés automatiquement à chaque session, quel que soit l’agent (voir §4).
+* Conformité (AES-R014) : le fait qu’une nouvelle tâche ne contredise pas une décision déjà prise.
+* Référentiel : l’ensemble des documents qui font autorité pour le projet.
+* Audit : un bilan de l’état du projet à un instant donné, voir AUDIT.md.
+* ADR : une décision d’architecture documentée, propre à un projet utilisant AES, voir DECISIONS.md.
+* Manifeste : le fichier qui décrit, une seule fois et de façon vérifiable, ce qui doit être installé.
+* Idempotence : le fait de pouvoir relancer une même opération plusieurs fois sans provoquer de doublon ni d’erreur.
+* Workflow : le déroulement, étape par étape, d’une tâche, voir WORKFLOW.md.
+* Vibe coding : voir §2 (Vision).
 
 ⸻
 

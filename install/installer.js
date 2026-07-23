@@ -16,10 +16,14 @@
 
 const fs = require("fs");
 const path = require("path");
-const { spawnSync } = require("child_process");
+const { gitState, writeAtomic, globalState } = require("./lib/core.js");
 
 const REPO_ROOT = path.resolve(__dirname, "..");
 const MANIFEST_PATH = path.join(REPO_ROOT, "install", "installation.manifest.json");
+
+const INTEGRATIONS = {
+  "claude-code": require("./integrations/claude_code.js"),
+};
 
 const VERSION_LINE_PREFIXES = [
   "Structure : issue d'AES v",
@@ -90,13 +94,6 @@ function analyze(cibleDir) {
   return manifest.fichiers.map((entry) => classifyFile(entry, iaDir));
 }
 
-function globalState(operations) {
-  if (operations.some((op) => op.action === "ERROR")) return "ERROR";
-  if (operations.some((op) => op.action === "CONFLICT")) return "BLOCKED_BY_CONFLICT";
-  if (operations.some((op) => op.action === "REVIEW")) return "COMPLETED_WITH_REVIEW";
-  return "OK";
-}
-
 function printReport(operations, mode) {
   const largeur = Math.max(...operations.map((op) => op.nom.length));
   for (const op of operations) {
@@ -104,22 +101,6 @@ function printReport(operations, mode) {
   }
   console.log();
   console.log(`État global (${mode}) : ${globalState(operations)}`);
-}
-
-/** Retourne 'absent', 'sale' ou 'propre'. */
-function gitState(cibleDir) {
-  const check = spawnSync("git", ["-C", cibleDir, "rev-parse", "--is-inside-work-tree"], { encoding: "utf8" });
-  if (check.status !== 0) return "absent";
-
-  const status = spawnSync("git", ["-C", cibleDir, "status", "--porcelain"], { encoding: "utf8" });
-  return status.stdout.trim() ? "sale" : "propre";
-}
-
-function writeAtomic(targetPath, contenu) {
-  fs.mkdirSync(path.dirname(targetPath), { recursive: true });
-  const temporaire = `${targetPath}.tmp`;
-  fs.writeFileSync(temporaire, contenu, "utf8");
-  fs.renameSync(temporaire, targetPath); // remplacement atomique
 }
 
 function cmdAnalyze(args) {
@@ -179,10 +160,87 @@ function cmdApply(args) {
   return 0;
 }
 
+function cmdIntegrationAnalyze(args) {
+  const integration = INTEGRATIONS[args.agent];
+  if (!integration) {
+    console.error(`Intégration inconnue : ${args.agent}. Intégrations disponibles : ${Object.keys(INTEGRATIONS).join(", ")}.`);
+    return 1;
+  }
+  const cibleDir = path.resolve(args.cheminProjet);
+  const operations = integration.analyze(cibleDir, REPO_ROOT);
+  console.log(`Analyse de l'intégration '${args.agent}' pour ${cibleDir} (aucune écriture, git ignoré) :\n`);
+  printReport(operations, "analyse");
+  return 0;
+}
+
+function cmdIntegrationApply(args) {
+  const integration = INTEGRATIONS[args.agent];
+  if (!integration) {
+    console.error(`Intégration inconnue : ${args.agent}. Intégrations disponibles : ${Object.keys(INTEGRATIONS).join(", ")}.`);
+    return 1;
+  }
+
+  const cibleDir = path.resolve(args.cheminProjet);
+
+  const git = gitState(cibleDir);
+  if (git === "absent" && !args.allowNoGit) {
+    console.error("Refus : aucun dépôt git détecté. Utiliser --allow-no-git pour passer outre explicitement.");
+    return 1;
+  }
+  if (git === "sale" && !args.allowDirty) {
+    console.error("Refus : arbre git non propre. Committer, stasher, ou utiliser --allow-dirty pour passer outre explicitement.");
+    return 1;
+  }
+
+  const operations = integration.analyze(cibleDir, REPO_ROOT);
+
+  console.log(`Plan pour l'intégration '${args.agent}' sur ${cibleDir} :\n`);
+  printReport(operations, "plan avant écriture");
+  console.log();
+
+  const etat = globalState(operations);
+  if (etat === "ERROR" || etat === "BLOCKED_BY_CONFLICT") {
+    console.error(`Application refusée : état global ${etat}. Aucun fichier écrit.`);
+    return 1;
+  }
+
+  let ecrits;
+  try {
+    ecrits = integration.apply(cibleDir, REPO_ROOT, operations);
+  } catch (exc) {
+    console.error(`Échec en cours d'écriture : ${exc.message}`);
+    return 1;
+  }
+
+  console.log(`Fichiers créés/fusionnés : ${ecrits.length ? ecrits.join(", ") : "aucun"}`);
+  console.log(`État final : ${etat}`);
+  return 0;
+}
+
 function main(argv) {
-  const [commande, cheminProjet, ...reste] = argv;
+  const [commande, ...reste0] = argv;
+
+  if (commande === "integration") {
+    const [verbe, agent, cheminProjet, ...reste] = reste0;
+    if (!verbe || !agent || !cheminProjet) {
+      console.error("Usage : node install/installer.js integration <analyze|apply> <agent> <chemin_projet> [--allow-no-git] [--allow-dirty]");
+      return 1;
+    }
+    const args = {
+      agent,
+      cheminProjet,
+      allowNoGit: reste.includes("--allow-no-git"),
+      allowDirty: reste.includes("--allow-dirty"),
+    };
+    if (verbe === "analyze") return cmdIntegrationAnalyze(args);
+    if (verbe === "apply") return cmdIntegrationApply(args);
+    console.error(`Commande inconnue : integration ${verbe}`);
+    return 1;
+  }
+
+  const [cheminProjet, ...reste] = reste0;
   if (!commande || !cheminProjet) {
-    console.error(__filename.endsWith(".js") ? "Usage : node install/installer.js <analyze|apply> <chemin_projet> [--allow-no-git] [--allow-dirty]" : "");
+    console.error("Usage : node install/installer.js <analyze|apply> <chemin_projet> [--allow-no-git] [--allow-dirty]");
     return 1;
   }
 
@@ -205,6 +263,7 @@ if (require.main === module) {
 
 module.exports = {
   REPO_ROOT,
+  INTEGRATIONS,
   loadManifest,
   normalizeContent,
   classifyFile,
@@ -215,5 +274,7 @@ module.exports = {
   writeAtomic,
   cmdAnalyze,
   cmdApply,
+  cmdIntegrationAnalyze,
+  cmdIntegrationApply,
   main,
 };

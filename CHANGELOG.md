@@ -2,7 +2,7 @@ CHANGELOG.md
 
 AI Engineering System (AES)
 
-Version : 1.3.0
+Version : 1.4.0
 
 Statut : 🟢 Vivant
 
@@ -104,6 +104,28 @@ Exemple :
 ⸻
 
 8. Historique
+
+## [1.4.0] - 2026-07-23
+
+### Added
+- AES-A004/AES-A005 (AUDIT.md racine) : audit documentaire global avant clôture du chantier conformité/installation, puis revue contradictoire requalifiant ses deux constats non triviaux après confrontation à l'architecture existante et à la documentation officielle de Claude Code.
+- AES-D012 (DECISIONS.md racine) : architecture d'installation des intégrations d'agents, un point d'entrée CLI unique, des garanties transverses partagées, une intégration Claude Code isolée dans son propre module et son propre manifeste, jamais mêlée au manifeste du socle `ia/`.
+- `install/lib/core.js` : garanties transverses (préconditions git, écriture atomique, agrégation d'état global) extraites de `install/installer.js` pour être partagées sans dépendance circulaire avec les intégrations d'agents.
+- `install/integrations/claude_code.manifest.json` et `install/integrations/claude_code.js` : intégration Claude Code complète, quatre artefacts (skill `/aes-check`, script du hook avec bit exécutable, entrée fusionnée dans `.claude/settings.json`, bloc `@import` fusionné dans CLAUDE.md référençant le socle sans dupliquer son contenu), fusion strictement additive pour les fichiers de configuration partagés, jamais de remplacement.
+- Nouvelle sous-commande `node install/installer.js integration analyze|apply claude-code <projet>`, mêmes garanties et vocabulaire de statuts que l'installateur du socle.
+- `install/tests/test_claude_code_integration.js` (`node --test`, 13 scénarios) : matrice complète des statuts pour les trois natures d'opération (copie, fusion JSON, fusion Markdown), idempotence, préconditions git, préservation à l'identique d'un CLAUDE.md fortement personnalisé.
+- AES-A006 (AUDIT.md racine) : audit d'accessibilité et d'expérience utilisateur sur dix points, avant la première publication publique du framework.
+- `.github/workflows/ci.yml` : vérification automatique sur chaque push et pull request vers `main` (validation du manifeste, exécution des 22 tests), sans dépendance à installer, l'installateur n'en ayant aucune.
+- `.github/RELEASE_CHECKLIST.md` : checklist opérationnelle de publication à l'usage du mainteneur, hors gouvernance du framework (SYSTEM.md §4).
+
+### Changed
+- INSTALLATION.md §6 : ajout d'une instruction actionnable pour Claude Code (« Intégration outillée »), remplaçant le simple pointeur vers `integrations/claude-code/` qui ne décrivait pas comment ces fichiers atteignaient réellement un projet cible.
+- `install/README.md` : nouvelle section 5 documentant la commande `integration`, ses statuts et ses limites, numérotation des sections suivantes décalée en conséquence.
+- SYSTEM.md, README.md, docs/PHILOSOPHY.md, docs/INSTALLATION.md : améliorations issues d'AES-A006. Redéfinition explicite de « développeur » et glossaire court dans SYSTEM.md ; restructuration de README.md autour du public visé (« Pour qui ? », « Démarrage rapide », parcours agent-médié séparé de la procédure détaillée) ; cadrage explicite d'un parcours délégué à un agent IA dès l'introduction de docs/INSTALLATION.md ; phrase d'ouverture accessible ajoutée dans docs/PHILOSOPHY.md.
+
+### Fixed
+- `install/README.md` : référence de section devenue incorrecte après l'ajout de la section 5 (Intégrations d'agents), corrigée sur l'ensemble du document.
+- Incohérence entre docs/INSTALLATION.md et `install/README.md` sur le caractère obligatoire de Git, clarifiée : fortement recommandé, jamais strictement obligatoire, voir `--allow-no-git`.
 
 ## [1.3.0] - 2026-07-22
 

@@ -2,7 +2,7 @@ DECISIONS.md
 
 AI Engineering System (AES)
 
-Version : 1.3.0
+Version : 1.4.0
 
 Statut : 🟢 Vivant
 
@@ -275,6 +275,37 @@ Justification : les projets cibles (3M Drive, GM_Communication, FrigoCheck) appa
 Alternatives étudiées : conserver l’implémentation Python déjà écrite, écartée en l’absence de raison technique forte et par cohérence avec l’écosystème des projets cibles.
 
 Conséquences : `install/installer.py`, `install/validate_manifest.py` et `install/tests/test_installer.py` supprimés après vérification de parité stricte (mêmes 9 scénarios de test, même sortie sur `examples/nextjs-project`, mêmes fichiers produits sur une installation neuve) ; INSTALLATION.md, CHANGELOG.md et DECISIONS.md mis à jour pour référencer les fichiers `.js`.
+
+Statut : Validée
+
+⸻
+
+AES-D012 — Architecture d'installation des intégrations d'agents
+
+Date : 2026-07-22
+
+Auteur : Développeur, avec l'agent
+
+Contexte : AES-A004/AES-A005 (AUDIT.md racine) ont établi que le déploiement de `/aes-check` (skill Claude Code, hook) dans un projet cible n'est ni outillé ni documenté de façon actionnable, contrairement au socle `ia/`. Une analyse d'architecture contradictoire a écarté deux options, étendre le manifeste du socle (mélangerait deux natures de protection différentes) et dupliquer un installateur complet par agent (reproduirait la duplication qu'AES-R011 interdit par ailleurs). Une vérification de bout en bout a ensuite révélé que le périmètre initialement envisagé (skill et hook seuls) était incomplet, sans le script exécuté par le hook ni le rattachement du socle dans CLAUDE.md, le projet cible ne serait pas réellement opérationnel après installation. Une recherche dans la documentation officielle de Claude Code a confirmé l'existence d'un mécanisme natif, la syntaxe d'import `@chemin/vers/fichier` dans CLAUDE.md, chargée au lancement, récursive, sans dupliquer le contenu importé.
+
+Décision : l'installateur AES reste un point d'entrée CLI unique. Les garanties transverses (préconditions git, écriture atomique, vocabulaire de statuts, agrégation d'état global) restent centralisées et partagées. Chaque intégration d'agent est isolée dans son propre module (`install/integrations/<agent>.js`) et son propre manifeste, jamais mêlée au manifeste du socle `ia/`. Pour Claude Code, le périmètre complet de l'intégration comprend quatre artefacts :
+
+* `SKILL.md`, copié dans `.claude/skills/aes-check/`, statut référence (🟡), classifié REVIEW en cas de modification locale, jamais CONFLICT ;
+* `aes-reminder.sh`, copié dans `.claude/hooks/`, avec restauration explicite du bit exécutable (chmod 755) après écriture ;
+* une entrée de hook dans `.claude/settings.json`, générée par le module d'intégration avec le chemin réellement installé dans le projet cible, jamais copiée telle quelle depuis l'organisation interne du dépôt AES, fusionnée de façon strictement additive (aucun remplacement du fichier, préservation de toute configuration existante, blocage sans tentative de réparation en cas de JSON invalide ou de structure inattendue) ;
+* un bloc balisé minimal dans CLAUDE.md, utilisant la syntaxe d'import officielle de Claude Code pour référencer les quatre documents du socle sans dupliquer leur contenu, sans référence à un numéro de section susceptible de devenir obsolète, fusionné selon le même principe additif que `settings.json` (identification par marqueurs, jamais de remplacement du reste du fichier).
+
+Le manifeste `install/integrations/claude_code.manifest.json` décrit explicitement, pour chaque artefact, la nature de l'opération à effectuer (`copie`, `fusion_json`, `fusion_markdown`), pas seulement un chemin de destination. La classification et l'écriture se font en fonction de ce champ, jamais en le déduisant de l'extension ou de l'emplacement du fichier.
+
+L'installateur ne modifie jamais CLAUDE.md en dehors du bloc délimité par ses propres marqueurs (`<!-- AES:SOCLE:BEGIN -->` / `<!-- AES:SOCLE:END -->`). Tout contenu du fichier situé hors de ce bloc, quel qu'il soit, est préservé à l'identique, y compris sa mise en forme et son ordre.
+
+Les dix autres documents `ia/` (STANDARDS, STACK, ARCHITECTURE, CONTEXT, PROMPTS, CHECKLIST, DECISIONS, AUDIT, LEARNING, CHANGELOG) restent consultés à la demande par l'agent, sans mécanisme de chargement automatique supplémentaire. Seule l'intégration Claude Code est implémentée dans cette phase ; aucune généralisation multi-agents (registre, système de plugins) n'est construite tant qu'un deuxième agent réel n'est pas validé.
+
+Justification : préserve l'agnosticisme du cœur, aucune ligne du manifeste `ia/` ni des documents socle ne mentionne un agent précis, tout en évitant la duplication des garanties déjà écrites et testées. Le choix de la fusion additive découle du constat que `settings.json` et CLAUDE.md n'appartiennent jamais entièrement à AES, contrairement aux documents de `ia/`. L'usage de la syntaxe d'import native plutôt qu'une duplication de contenu applique directement AES-R011 par le mécanisme que Claude Code prévoit lui-même à cet effet, plutôt que par une convention propre à AES. La correspondance entre chargement automatique (`@import`, au lancement) et consultation sélective (lecture à la demande par l'agent) reproduit exactement la distinction qu'AES fait déjà entre socle et documents de référence, sans qu'aucune adaptation de fond n'ait été nécessaire.
+
+Alternatives étudiées : extension du manifeste existant, écartée (mélange deux natures de protection) ; un installateur indépendant par agent, écarté (duplication des garanties transverses, contraire à AES-R011 appliqué au code) ; généralisation multi-agents immédiate, écartée (généralité spéculative avec un seul agent réel) ; reproduction du chemin interne au dépôt AES dans le hook installé, écartée (produirait une configuration silencieusement cassée) ; bloc CLAUDE.md en prose dupliquant la description du socle, écarté au profit de l'import natif, qui référence sans dupliquer et reste stable indépendamment de toute renumérotation de section.
+
+Conséquences : nouveau module partagé `install/lib/core.js` (garanties transverses extraites de `install/installer.js` pour éviter toute dépendance circulaire avec les intégrations) ; nouveaux fichiers sous `install/integrations/` (module et manifeste dédiés à Claude Code) ; nouvelle sous-commande `integration analyze|apply claude-code <projet>` ; INSTALLATION.md §6 et `install/README.md` mis à jour pour documenter cette procédure de façon actionnable ; fermeture d'AES-A004/AES-A005 une fois la recommandation appliquée. Les tests d'intégration incluent explicitement un scénario de CLAUDE.md fortement personnalisé (contenu, sections et mise en forme propres à un projet réel), vérifiant qu'il est préservé à l'identique en dehors du seul bloc balisé AES, aussi bien lors d'une première installation que lors d'une réapplication. SYSTEM.md passe en version 1.4.0.
 
 Statut : Validée
 
