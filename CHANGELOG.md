@@ -2,7 +2,7 @@ CHANGELOG.md
 
 AI Engineering System (AES)
 
-Version : 1.4.0
+Version : 1.4.1
 
 Statut : 🟢 Vivant
 
@@ -104,6 +104,11 @@ Exemple :
 ⸻
 
 8. Historique
+
+## [1.4.1] - 2026-07-23
+
+### Fixed
+- `install/README.md` §2-5 et `docs/INSTALLATION.md` §2 : le parcours d'installation ne documentait ni comment obtenir AES (`git clone`), ni comment invoquer l'installateur en partant du projet cible plutôt que du dépôt AES, un scénario pourtant réel et déjà supporté techniquement (`install/installer.js` résout son propre emplacement depuis son chemin de fichier, jamais depuis le dossier courant). Ajout de la commande de clonage, d'une structure recommandée (dossiers voisins, non obligatoire), et des commandes `analyze`/`apply`/`integration` dans les deux sens.
 
 ## [1.4.0] - 2026-07-23
 

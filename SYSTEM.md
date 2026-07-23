@@ -2,7 +2,7 @@ SYSTEM.md
 
 AI Engineering System (AES)
 
-Version : 1.4.0
+Version : 1.4.1
 
 Statut : 🔒 Gouvernance
 

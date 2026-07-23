@@ -23,13 +23,14 @@ L’installation est conçue pour :
 
 Avant de commencer, assurez-vous de disposer de :
 
+* Git installé sur votre machine ([git-scm.com](https://git-scm.com)), nécessaire pour obtenir une copie du dépôt AES Framework (voir §3) ;
 * Node.js installé sur votre machine ;
-* une copie du dépôt AES Framework ;
+* une copie locale du dépôt AES Framework, obtenue par clonage (voir §3) ;
 * un projet cible dans lequel vous souhaitez installer AES.
 
 Aucune dépendance supplémentaire n’est nécessaire : l’installateur utilise uniquement les modules natifs de Node.js.
 
-L’utilisation d’un dépôt Git dans le projet cible est fortement recommandée pour bénéficier de toutes les garanties de sécurité.
+L’utilisation d’un dépôt Git dans le projet cible, distinct du dépôt AES Framework lui-même, est fortement recommandée pour bénéficier de toutes les garanties de sécurité de l’installateur.
 
 ⸻
 
@@ -42,13 +43,42 @@ Toutes les commandes doivent être exécutées depuis un terminal :
 * Terminal macOS ;
 * Terminal Linux.
 
-Placez-vous d’abord à la racine du dépôt AES Framework.
+Obtenir AES Framework
 
-Exemple :
+Tant qu’aucun package npm n’est publié (voir §13, Limites connues), une copie locale s’obtient par clonage Git :
+
+git clone https://github.com/sbg224/AES-framework.git
+
+Cette commande crée un dossier `AES-framework/` à l’endroit où elle est lancée.
+
+Emplacement recommandé
+
+La structure recommandée, utilisée dans tous les exemples de cette documentation, place AES Framework en dossier voisin des projets qui l’utilisent :
+
+Projets/
+├── AES-Framework/
+├── mon-projet/
+└── ...
+
+Cette organisation est recommandée, pas obligatoire. Toutes les commandes ci-dessous acceptent aussi bien des chemins relatifs que des chemins absolus, dans n’importe quel ordre d’imbrication des dossiers sur le disque ; seul compte le chemin réellement fourni. `.` désigne toujours le dossier courant, celui où la commande est lancée.
+
+Cloner AES Framework à l’intérieur du dossier du projet cible est en revanche déconseillé : le dépôt AES a son propre historique Git, imbriqué dans celui du projet cible, cela fausserait la détection de l’état de l’arbre (`--allow-dirty`, voir §6) et mélangerait deux dépôts sans raison.
+
+Deux façons équivalentes de lancer les commandes
+
+`install/installer.js` résout toujours l’emplacement du framework depuis son propre chemin de fichier, jamais depuis le dossier où la commande est lancée. Les deux façons suivantes sont donc strictement équivalentes ; le choix dépend uniquement de l’endroit où se trouve déjà le terminal ou l’agent IA.
+
+Depuis la racine du dépôt AES Framework, en désignant le projet cible :
 
 cd AES-Framework
+node install/installer.js analyze ../mon-projet
 
-Toutes les commandes suivantes sont lancées depuis cet emplacement.
+Depuis la racine du projet cible, en désignant le dépôt AES Framework :
+
+cd mon-projet
+node ../AES-Framework/install/installer.js analyze .
+
+Toutes les commandes de ce document utilisent la première forme par convention de lecture ; remplacer le chemin d’accès à `install/installer.js` et le chemin du projet cible par les vôtres selon la position choisie et l’emplacement réel des deux dossiers. Les mêmes deux façons s’appliquent identiquement à `apply` (§4) et à `integration analyze`/`integration apply` (§5).
 
 ⸻
 
@@ -66,9 +96,13 @@ Elle :
 
 node install/installer.js analyze <chemin_projet>
 
-Exemple :
+Exemple, depuis la racine du dépôt AES Framework :
 
 node install/installer.js analyze ../3M-Drive
+
+Exemple équivalent, depuis la racine du projet cible (voir §3) :
+
+node ../AES-Framework/install/installer.js analyze .
 
 Vous pouvez lancer cette commande autant de fois que nécessaire.
 
@@ -88,9 +122,13 @@ Une fois l’analyse validée, lancez l’installation réelle :
 
 node install/installer.js apply <chemin_projet>
 
-Exemple :
+Exemple, depuis la racine du dépôt AES Framework :
 
 node install/installer.js apply ../3M-Drive
+
+Exemple équivalent, depuis la racine du projet cible (voir §3) :
+
+node ../AES-Framework/install/installer.js apply .
 
 Avant toute écriture, apply effectue automatiquement une nouvelle analyse afin de garantir que le plan d’installation correspond toujours à l’état réel du projet.
 
@@ -100,10 +138,15 @@ Avant toute écriture, apply effectue automatiquement une nouvelle analyse afin 
 
 Le socle `ia/` (sections 1 à 4 ci-dessus) est indépendant de tout agent. Le rattachement à un agent précis (chargement du socle, `/aes-check`, rappel non bloquant) relève d'une commande séparée, `integration`, décrite dans docs/INSTALLATION.md §6 et fondée sur AES-D012 (DECISIONS.md).
 
-Pour Claude Code :
+Pour Claude Code, depuis la racine du dépôt AES Framework :
 
 node install/installer.js integration analyze claude-code <chemin_projet>
 node install/installer.js integration apply   claude-code <chemin_projet> [--allow-no-git] [--allow-dirty]
+
+Exemple équivalent, depuis la racine du projet cible (voir §3) :
+
+node ../AES-Framework/install/installer.js integration analyze claude-code .
+node ../AES-Framework/install/installer.js integration apply   claude-code . [--allow-no-git] [--allow-dirty]
 
 Cette commande installe quatre artefacts, décrits dans `install/integrations/claude_code.manifest.json` :
 

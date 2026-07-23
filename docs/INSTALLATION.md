@@ -20,6 +20,7 @@ Avant de commencer, vérifier que :
 
 * le projet dispose si possible d’un dépôt Git, l’outil qui garde l’historique des modifications ([git-scm.com](https://git-scm.com) si besoin de l’installer) ; fortement recommandé, mais pas strictement obligatoire, voir `--allow-no-git` dans [`install/README.md`](../install/README.md) ;
 * Node.js est installé sur la machine ([nodejs.org](https://nodejs.org)), nécessaire à l’installateur AES ;
+* une copie locale du dépôt AES Framework existe déjà sur la machine, obtenue par exemple avec `git clone https://github.com/sbg224/AES-framework.git` (aucun package npm n’est encore publié) ; son emplacement exact n’importe pas, l’installateur peut être invoqué aussi bien depuis la racine du dépôt AES que depuis celle du projet cible, voir [`install/README.md`](../install/README.md) §3 pour la structure recommandée et les deux façons équivalentes de l’invoquer ;
 * les autres outils de développement propres au projet sont installés.
 
 Si l’un de ces éléments manque ou si vous ne savez pas comment vérifier leur présence, demandez à votre agent IA de le faire pour vous, il sait interroger la machine et guider l’installation si nécessaire.
