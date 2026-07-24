@@ -2,7 +2,7 @@ CHANGELOG.md
 
 AI Engineering System (AES)
 
-Version : 1.4.1
+Version : 1.4.2
 
 Statut : 🟢 Vivant
 
@@ -104,6 +104,11 @@ Exemple :
 ⸻
 
 8. Historique
+
+## [1.4.2] - 2026-07-23
+
+### Fixed
+- `integrations/claude-code/hooks/aes-reminder.sh` (AES-A007, AUDIT.md racine) : le rappel automatique d'AES-R014 (hook `UserPromptSubmit`) utilisait le champ `systemMessage`, affiché uniquement dans l'interface utilisateur, jamais transmis au contexte du modèle. Remplacé par `hookSpecificOutput.additionalContext`, seul champ effectivement délivré à l'agent pour cet événement, confirmé par la documentation officielle de Claude Code et par test empirique. Le rappel était donc silencieusement inopérant côté agent depuis sa création en version 1.3.0, sur tout projet ayant installé l'intégration Claude Code.
 
 ## [1.4.1] - 2026-07-23
 

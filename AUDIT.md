@@ -2,7 +2,7 @@ AUDIT.md
 
 AI Engineering System (AES)
 
-Version : 1.4.1
+Version : 1.4.2
 
 Statut : 🟢 Vivant
 
@@ -225,6 +225,33 @@ Recommandations :
 Priorité : Élevée.
 
 Statut : Corrigé. SYSTEM.md §2 (redéfinition de « développeur ») et §5 (glossaire) ; README.md restructuré (sections « Pour qui ? », « Démarrage rapide », « Suivre la procédure vous-même ») ; docs/INSTALLATION.md §1 et §2 cadrés pour un parcours agent-médié ; docs/PHILOSOPHY.md §1 complété. Ces corrections sont éditoriales, elles ne modifient ni l'architecture ni la gouvernance du framework et n'ont donc donné lieu à aucune nouvelle décision dans DECISIONS.md.
+
+⸻
+
+AES-A007 — Rappel AES-R014 silencieusement inopérant côté agent depuis la v1.3.0
+
+Date : 2026-07-23
+
+Auteur : Agent, sur un projet tiers (AHADI Group), constat remonté et vérifié dans ce dépôt
+
+Domaine : Intégration Claude Code, Fiabilité
+
+Résumé : un test de conformité approfondi d'AES v1.4.1, mené sur un troisième projet réel après AHADI Service et 3M Drive, a révélé que le rappel automatique d'AES-R014 (hook `UserPromptSubmit`, `integrations/claude-code/hooks/aes-reminder.sh`) n'atteignait en réalité jamais l'agent, sur aucun des trois projets, depuis sa création en version 1.3.0.
+
+Constats :
+
+* le script renvoyait le rappel via le champ `systemMessage`, affiché uniquement dans l'interface utilisateur, jamais transmis au contexte du modèle, confirmé par recherche documentaire ciblée sur la documentation officielle de Claude Code, puis par test empirique (le script s'exécutait bien à chaque message, horodatage et variables d'environnement corrects, mais son contenu n'apparaissait à aucun moment dans le contexte reçu par l'agent) ;
+* toute application correcte d'AES-R014 observée pendant les trois tests provenait de la lecture directe du socle (RULES_OF_ENGAGEMENT.md, WORKFLOW.md), jamais du rappel automatique ; la garantie de fond n'a donc jamais été compromise, seul le déclencheur ergonomique était silencieusement inopérant ;
+* une tentative de solution complémentaire (second hook, événement `Stop`, même mécanisme `additionalContext`, pour couvrir la clôture de tâche) a été testée et écartée : `additionalContext` sur `Stop` force la conversation à continuer par conception, l'événement ne supporte aucun filtre pour le limiter aux vraies clôtures de tâche, ce qui en ferait un coût permanent et diffus plutôt qu'une vigilance concentrée sur un risque réel ; consigné en apprentissage annexe, pas retenu comme correction.
+
+Recommandations :
+
+* remplacer `systemMessage` par `hookSpecificOutput.additionalContext` (avec `hookSpecificOutput.hookEventName: "UserPromptSubmit"`) dans `integrations/claude-code/hooks/aes-reminder.sh`, seul champ effectivement délivré à l'agent pour cet événement ;
+* aucune extension au hook `Stop` ni à un autre événement, le correctif reste ciblé sur le seul mécanisme réellement cassé.
+
+Priorité : Élevée.
+
+Statut : Corrigé. `integrations/claude-code/hooks/aes-reminder.sh` mis à jour (voir CHANGELOG.md 1.4.2). Correction factuelle, sans choix d'architecture ou de gouvernance en jeu, aucune nouvelle entrée DECISIONS.md.
 
 ⸻
 
