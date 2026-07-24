@@ -305,8 +305,12 @@ function cmdIntegrationApply(args) {
 
 // Point d'entrée du CLI : découpe argv et redirige vers la bonne commande.
 // Deux familles de commandes coexistent :
-//   - le socle "ia/"        : node installer.js <analyze|apply> <projet>
-//   - une intégration agent : node installer.js integration <analyze|apply> <agent> <projet>
+//   - le socle "ia/"        : aes-framework <analyze|apply> <projet>
+//   - une intégration agent : aes-framework integration <analyze|apply> <agent> <projet>
+// Invocable soit via la commande publiée `aes-framework` (voir le champ
+// "bin" de package.json), soit directement depuis une copie du dépôt via
+// `node install/installer.js ...` — les deux formes sont strictement
+// équivalentes, seuls les messages d'usage ci-dessous montrent la première.
 // Retourne toujours un code numérique (0 = succès, 1 = refus/erreur),
 // jamais d'exception non gérée, pour que le code de sortie du process
 // (voir process.exit ci-dessous) soit toujours prévisible depuis un script
@@ -317,7 +321,13 @@ function main(argv) {
   if (commande === "integration") {
     const [verbe, agent, cheminProjet, ...reste] = reste0;
     if (!verbe || !agent || !cheminProjet) {
-      console.error("Usage : node install/installer.js integration <analyze|apply> <agent> <chemin_projet> [--allow-no-git] [--allow-dirty]");
+      console.error(
+        [
+          "Usage :",
+          "  aes-framework integration analyze claude-code <chemin-projet> [--allow-no-git] [--allow-dirty]",
+          "  aes-framework integration apply   claude-code <chemin-projet> [--allow-no-git] [--allow-dirty]",
+        ].join("\n")
+      );
       return 1;
     }
     const args = {
@@ -334,7 +344,15 @@ function main(argv) {
 
   const [cheminProjet, ...reste] = reste0;
   if (!commande || !cheminProjet) {
-    console.error("Usage : node install/installer.js <analyze|apply> <chemin_projet> [--allow-no-git] [--allow-dirty]");
+    console.error(
+      [
+        "Usage :",
+        "  aes-framework analyze <chemin-projet> [--allow-no-git] [--allow-dirty]",
+        "  aes-framework apply   <chemin-projet> [--allow-no-git] [--allow-dirty]",
+        "  aes-framework integration analyze claude-code <chemin-projet> [--allow-no-git] [--allow-dirty]",
+        "  aes-framework integration apply   claude-code <chemin-projet> [--allow-no-git] [--allow-dirty]",
+      ].join("\n")
+    );
     return 1;
   }
 

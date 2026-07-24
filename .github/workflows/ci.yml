@@ -16,3 +16,4 @@ jobs:
           node-version: 20
       - run: node install/validate_manifest.js
       - run: node --test install/tests/test_installer.js install/tests/test_claude_code_integration.js
+      - run: npm pack --dry-run

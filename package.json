@@ -1,0 +1,46 @@
+{
+  "name": "aes-framework",
+  "version": "1.4.2",
+  "description": "AES (AI Engineering System) — a documentation-driven framework and CLI that keeps AI coding agents aligned with a project's decisions, architecture, and rules across long sessions.",
+  "license": "MIT",
+  "author": "Mohamed Bah",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/sbg224/AES-framework.git"
+  },
+  "homepage": "https://github.com/sbg224/AES-framework#readme",
+  "bugs": {
+    "url": "https://github.com/sbg224/AES-framework/issues"
+  },
+  "keywords": [
+    "ai",
+    "agent",
+    "claude-code",
+    "governance",
+    "documentation",
+    "cli"
+  ],
+  "bin": {
+    "aes-framework": "./install/installer.js"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  },
+  "files": [
+    "install/installer.js",
+    "install/lib/",
+    "install/integrations/",
+    "install/installation.manifest.json",
+    "integrations/",
+    "templates/",
+    "SYSTEM.md",
+    "LICENSE",
+    "README.md"
+  ],
+  "scripts": {
+    "validate": "node install/validate_manifest.js",
+    "test": "node --test install/tests/test_installer.js install/tests/test_claude_code_integration.js",
+    "prepack": "npm run validate && npm test",
+    "prepublishOnly": "npm run validate && npm test"
+  }
+}
