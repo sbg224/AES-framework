@@ -17,16 +17,26 @@ const REPO_ROOT = path.resolve(__dirname, "..");
 const MANIFEST_PATH = path.join(REPO_ROOT, "install", "installation.manifest.json");
 const INSTALLATION_MD = path.join(REPO_ROOT, "docs", "INSTALLATION.md");
 
+// Correspondance entre le statut déclaré dans le manifeste (mot en
+// français) et le symbole attendu en tête du fichier source réel
+// (ex. "Statut : 🟢 Vivant"). Sert à détecter une désynchronisation entre
+// ce que le manifeste affirme et ce que le fichier affiche réellement.
 const STATUT_MARKERS = {
   gouvernance: "🔒",
   reference: "🟡",
   vivant: "🟢",
 };
 
+// Lit et parse le manifeste du socle depuis le disque.
 function loadManifest() {
   return JSON.parse(fs.readFileSync(MANIFEST_PATH, "utf8"));
 }
 
+// Liste les 14 fichiers du socle tels qu'ils existent réellement sur le
+// disque du dépôt AES : tous les .md de templates/, plus SYSTEM.md à la
+// racine (seul fichier du socle qui n'est pas dans templates/). Triée pour
+// permettre une comparaison directe avec la liste du manifeste, elle aussi
+// triée avant comparaison.
 function fichiersSurDisque() {
   const templates = fs
     .readdirSync(path.join(REPO_ROOT, "templates"))
@@ -35,6 +45,15 @@ function fichiersSurDisque() {
   return [...templates, "SYSTEM.md"].sort();
 }
 
+// Extrait la liste des 14 fichiers telle qu'énumérée en prose dans
+// docs/INSTALLATION.md, entre deux repères textuels fixes ("Depuis la
+// racine du framework" et "Soit 14 fichiers au total"), pour vérifier que
+// la documentation lisible par un humain ne diverge jamais du manifeste
+// technique. Si ces deux repères venaient à changer de formulation, cette
+// fonction renverrait une liste vide ou tronquée plutôt que de lever une
+// erreur explicite ; la comparaison qui suit dans main() détecterait quand
+// même la divergence (liste vide ≠ 14 fichiers attendus), mais sans
+// message clair désignant la cause réelle.
 function fichiersDansInstallationMd() {
   const texte = fs.readFileSync(INSTALLATION_MD, "utf8");
   const debut = texte.indexOf("Depuis la racine du framework");
@@ -44,12 +63,20 @@ function fichiersDansInstallationMd() {
   return matches.sort();
 }
 
+// Lit la ligne "Statut : <symbole> <mot>" en tête d'un fichier source
+// (ex. SYSTEM.md, templates/DECISIONS.md) et retourne uniquement le
+// symbole, pour le comparer au symbole attendu selon le statut déclaré
+// dans le manifeste (voir STATUT_MARKERS ci-dessus).
 function statutDeclareDansLeFichier(cheminSource) {
   const texte = fs.readFileSync(path.join(REPO_ROOT, cheminSource), "utf8");
   const match = texte.match(/^Statut :\s*(\S+)/m);
   return match ? match[1] : null;
 }
 
+// Exécute les 5 vérifications de cohérence et affiche le détail de tout
+// écart trouvé. Ne s'arrête jamais à la première erreur : accumule tous
+// les écarts dans un même passage, pour donner une vue complète en un seul
+// lancement plutôt que de forcer plusieurs allers-retours.
 function main() {
   const erreurs = [];
   const manifest = loadManifest();
@@ -108,8 +135,12 @@ function main() {
   return 0;
 }
 
+// Ne s'exécute que si ce fichier est lancé directement en CLI, jamais
+// quand il est simplement require()-ié (même logique que installer.js).
 if (require.main === module) {
   process.exit(main());
 }
 
+// Exports utilisés potentiellement par d'autres scripts ou tests pour
+// réutiliser ces vérifications individuellement.
 module.exports = { main, loadManifest, fichiersSurDisque, fichiersDansInstallationMd, statutDeclareDansLeFichier };
